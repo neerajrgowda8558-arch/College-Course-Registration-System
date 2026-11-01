@@ -2,11 +2,11 @@
 
 ## 1. Project Overview
 
-CourseHub is a DBMS mini project designed to manage college course registration and academic records.
+CourseHub is a DBMS mini project developed to manage college course registration and academic records.
 
 The system integrates **PostgreSQL** as a relational database and **Neo4j** as a graph database. It provides separate Admin and Student interfaces using role-based authentication.
 
-The project demonstrates relational database operations, graph-based prerequisite relationships, database connectivity, authentication, and full-stack web application development.
+The project demonstrates relational database operations, graph-based course prerequisite relationships, database connectivity, authentication, and full-stack web application development.
 
 ## 2. Technology Stack
 
@@ -17,7 +17,7 @@ The project demonstrates relational database operations, graph-based prerequisit
 | Backend | Next.js API Routes |
 | Relational Database | PostgreSQL |
 | Graph Database | Neo4j |
-| Authentication | JWT, bcrypt |
+| Authentication | JWT, bcryptjs |
 | Development Environment | VS Code |
 | Version Control | Git and GitHub |
 
@@ -47,13 +47,14 @@ The project demonstrates relational database operations, graph-based prerequisit
 
 ### Security Features
 
-- Password verification using bcrypt
+- Password verification using bcryptjs
 - JWT-based session authentication
 - Role-based access control
 - Admin-only API endpoints
 - Server-side protection of Admin pages
 - Student access restricted to their own dashboard
-- Environment variables used for database credentials and session secrets
+- Environment variables for database credentials and session secrets
+- Password hashing for newly created accounts
 
 ## 4. Database Design
 
@@ -126,6 +127,8 @@ The script uses `MERGE` to avoid creating duplicate nodes or relationships when 
 
 ```text
 College-Course-Registration-System/
+├── scripts/
+│   └── setup-accounts.js
 ├── src/
 │   ├── app/
 │   │   ├── (admin)/
@@ -171,7 +174,7 @@ College-Course-Registration-System/
 
 Install the following software:
 
-- Node.js and npm
+- Node.js (version supporting `process.loadEnvFile`) and npm
 - PostgreSQL
 - pgAdmin (optional)
 - Neo4j
@@ -282,11 +285,40 @@ The application uses the PostgreSQL `app_users` table for authentication.
 
 The schema backup creates this table but does not include existing user accounts.
 
-Before testing login on a fresh installation, create the required Admin and Student account records using the application's expected user fields and bcrypt-compatible password hashes.
+The project provides an account setup script:
 
-Ensure that student accounts are associated with the correct student records according to the application's authentication implementation.
+`scripts/setup-accounts.js`
 
-Do not store plaintext passwords in the database or publish actual credentials in this repository.
+**Step 1:** Make sure PostgreSQL is running and `.env.local` is configured.
+
+**Step 2:** Open a terminal in the project folder.
+
+**Step 3:** Run:
+
+```bash
+node scripts/setup-accounts.js
+```
+
+**Step 4:** Follow the terminal prompts.
+
+The script asks for:
+
+- Account role (`admin` or `student`)
+- Username
+- Password (minimum 12 characters)
+- Existing student ID (required for Student accounts)
+
+The script uses bcryptjs to securely hash passwords before storing them in PostgreSQL.
+
+**For Admin accounts:** Select `admin`. A student ID is not required.
+
+**For Student accounts:** Select `student` and provide an existing `student_id` from the `students` table.
+
+A Student record must exist before its login account can be created because the database enforces a foreign key relationship between `app_users.student_id` and `students.student_id`.
+
+The script creates new accounts and does not update existing accounts. Use a unique username.
+
+**Security note:** Passwords are visible while entering them in the terminal. Run the script privately and do not share or record the passwords in screenshots, documentation, or GitHub.
 
 ### 6.8 Run the Application
 
@@ -355,6 +387,9 @@ The project has been tested for:
 - Logout functionality
 - Successful Next.js production build
 - TypeScript build checks
+- Account setup script startup and JavaScript syntax validation
+
+**Note:** The account setup script has been checked for syntax and confirmed to start. Successful creation of a new account through the script has not yet been verified.
 
 ### Database Verification
 
@@ -402,4 +437,4 @@ Project source code:
 
 https://github.com/neerajrgowda8558-arch/College-Course-Registration-System
 
-The repository contains the application source code, PostgreSQL schema, Neo4j setup script, and project documentation.
+The repository contains the application source code, PostgreSQL schema, Neo4j setup script, project documentation, and account setup utility.
